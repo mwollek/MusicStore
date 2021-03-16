@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MvcMusicStore.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -9,24 +10,31 @@ namespace MvcMusicStore.Controllers
     public class StoreController : Controller
     {
         // GET: Store
-        public string Index()
+        public ActionResult Index()
         {
-            return "Hello from Store.Index()";
+            var genres = new List<Genre>
+            {
+                new Genre{Name = "Disco"},
+                new Genre{Name = "Rock"},
+                new Genre{Name = "Jazz"}
+
+            };
+            return View(genres);
+
         }
 
         // GET: Store/Browse
-        public string Browse(string genre)
+        public ActionResult Browse(string genre)
         {
-            string message = HttpUtility.HtmlEncode("Store.Browse, Genre = " + genre);
-            return message;
-
+            var genreModel = new Genre() { Name = genre };
+            return View(genreModel);
         }
 
         // GET: Store/Details
-        public string Details(int? id)
+        public ActionResult Details(int? id)
         {
-            string message = @"Store.Details, ID = "+ id;
-            return message;
+            var album = new Album() { Title = "Album " + id };
+            return View(album);
         }
     }
 }
