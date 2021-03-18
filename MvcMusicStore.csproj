@@ -171,6 +171,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\Own\ShoppingCartController.cs" />
+    <Compile Include="Controllers\Own\StoreController.cs" />
     <Compile Include="Controllers\Own\StoreManagerController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
