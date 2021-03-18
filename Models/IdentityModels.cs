@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
+using MvcMusicStore.Models.Own;
 
 namespace MvcMusicStore.Models
 {
@@ -28,6 +29,9 @@ namespace MvcMusicStore.Models
         public virtual DbSet<Album> Albums { get; set; }
         public virtual DbSet<Genre> Genres { get; set; }
         public virtual DbSet<Artist> Artists { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
 
         public static ApplicationDbContext Create()
         {
