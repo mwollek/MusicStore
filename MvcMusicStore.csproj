@@ -184,6 +184,7 @@
     <Compile Include="Models\Own\Order.cs" />
     <Compile Include="Models\Own\OrderDetail.cs" />
     <Compile Include="Models\Own\SampleData.cs" />
+    <Compile Include="Models\Own\ShoppingCart.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="System\DataTime.cs" />

@@ -1,0 +1,169 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace MvcMusicStore.Models.Own
+{
+    public partial class ShoppingCart
+    {
+        ApplicationDbContext db = new ApplicationDbContext();
+
+        string ShoppingCartId { get; set; }
+        public const string CartSessionKey = "CartId";
+
+        public static ShoppingCart GetCart(HttpContextBase context)
+        {
+            var cart = new ShoppingCart();
+            cart.ShoppingCartId = cart.GetCartId(context);
+            return cart;
+        }
+
+        // Helper method to simplify shopping cart calls
+        public static ShoppingCart GetCart(Controller controller)
+        {
+            return GetCart(controller.HttpContext);
+        }
+
+        public void AddToCart(Album album)
+        {
+            // Get the matching cart and album instances
+            var cartItem = db.Carts.SingleOrDefault(c => c.CartId == ShoppingCartId
+                                                        && c.AlbumId == album.AlbumId);
+
+            if (cartItem == null)
+            {
+                cartItem = new Cart
+                {
+                    AlbumId = album.AlbumId,
+                    CartId = ShoppingCartId,
+                    Count = 1,
+                    DataCreated = DateTime.Now
+                };
+
+                db.Carts.Add(cartItem);
+            }
+
+            // if exists, incresing quantity
+            else
+            {
+                cartItem.Count++;
+            }
+
+            db.SaveChanges();
+        }
+
+        public int RemoveFromCart(int id)
+        {
+            var cartItem = db.Carts.SingleOrDefault(c => c.CartId == ShoppingCartId
+                                                        && c.RecordId == id);
+            int itemCount = 0;
+            if (cartItem != null)
+            {
+                if (cartItem.Count > 1)
+                {
+                    cartItem.Count--;
+                    itemCount = cartItem.Count;
+                }
+                else
+                {
+                    db.Carts.Remove(cartItem);
+                }
+                db.SaveChanges();
+            }
+
+
+            return itemCount;
+        }
+
+        public void EmptyCart()
+        {
+            var cartItems = db.Carts.Where(c => c.CartId == ShoppingCartId);
+            foreach (var cartItem in cartItems)
+            {
+                db.Carts.Remove(cartItem);
+            }
+            db.SaveChanges();
+        }
+
+        public List<Cart> GetCartItems()
+        {
+            return db.Carts.Where(cart => cart.CartId == ShoppingCartId).ToList();
+        }
+
+        public int GetCount()
+        {
+            int? count = db.Carts.Where(cart => cart.CartId == ShoppingCartId).ToList().Sum(c => c.Count);
+            return count ?? 0;
+        }
+
+        public decimal GetTotal()
+        {
+            /*    decimal? total = (from cartItems in db.Carts
+                                  where cartItems.CartId == ShoppingCartId
+                                  select (int?)cartItems.Count * cartItems.Album.Price).Sum();*/
+            decimal? total = db.Carts.Where(cart => cart.CartId == ShoppingCartId).ToList().Sum(c => c.Count * c.Album.Price);
+
+            return total ?? decimal.Zero;
+        }
+
+        public int CreateOrder(Order order)
+        {
+            decimal orderTotal = 0;
+
+            var cartItems = GetCartItems();
+
+            foreach (var item in cartItems)
+            {
+                var orderDetails = new OrderDetail
+                {
+                    AlbumId = item.AlbumId,
+                    OrderId = order.OrderId,
+                    UnitPrice = item.Album.Price,
+                    Quantity = item.Count
+                };
+
+                orderTotal += (item.Count * item.Album.Price);
+
+                db.OrderDetails.Add(orderDetails);
+            }
+
+            order.Total = orderTotal;
+
+            db.SaveChanges();
+            EmptyCart();
+            return order.OrderId;
+        }
+
+        private string GetCartId(HttpContextBase context)
+        {
+            if (context.Session[CartSessionKey] == null)
+            {
+                if (!string.IsNullOrWhiteSpace(context.User.Identity.Name))
+                {
+                    context.Session[CartSessionKey] = context.User.Identity.Name;
+                }
+                else
+                {
+                    Guid tempCartId = Guid.NewGuid();
+                    // Send tempCartId back to client as a cookie
+                    context.Session[CartSessionKey] = tempCartId.ToString();
+                }
+
+            }
+            return context.Session[CartSessionKey].ToString();
+        }
+
+        public void MigrateCart(string userName)
+        {
+            var shoppingCart = db.Carts.Where(c => c.CartId == ShoppingCartId);
+            foreach (Cart item in shoppingCart)
+            {
+                item.CartId = userName;
+            }
+            db.SaveChanges();
+        }
+
+    }
+}

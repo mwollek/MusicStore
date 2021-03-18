@@ -40,7 +40,7 @@ namespace MvcMusicStore
                 user.UserName = "admin@gmail.com";
                 user.Email = "admin@gmail.com";
 
-                string userPWD = "Admin!0";
+                string userPWD = "Sup34Admin";
 
                 var chkUser = UserManager.Create(user, userPWD);
 
@@ -48,6 +48,30 @@ namespace MvcMusicStore
                 if (chkUser.Succeeded)
                 {
                     var result1 = UserManager.AddToRole(user.Id, "Admin");
+                }
+            }
+            if (!roleManager.RoleExists("SUser"))
+            {
+
+                // first we create Admin rool    
+                var role = new IdentityRole();
+                role.Name = "SUser";
+                roleManager.Create(role);
+
+                //Here we create a Admin super user who will maintain the website                   
+
+                var user = new ApplicationUser();
+                user.UserName = "user@gmail.com";
+                user.Email = "user@gmail.com";
+
+                string userPWD = "Sup34User";
+
+                var chkUser = UserManager.Create(user, userPWD);
+
+                //Add default User to Role Admin    
+                if (chkUser.Succeeded)
+                {
+                    var result1 = UserManager.AddToRole(user.Id, "SUser");
                 }
             }
         }

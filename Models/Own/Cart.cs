@@ -13,7 +13,8 @@ namespace MvcMusicStore.Models.Own
         public string CartId { get; set; }
         public int AlbumId { get; set; }
         public int Count { get; set; }
-        public DataTime DataCreated { get; set; }
+
+        public System.DateTime DataCreated { get; set; }
 
         public virtual Album Album { get; set; }
 
