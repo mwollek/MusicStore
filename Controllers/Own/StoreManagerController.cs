@@ -12,7 +12,7 @@ namespace MvcMusicStore.Controllers
 {
     public class StoreManagerController : Controller
     {
-        private MusicStoreEntities db = new MusicStoreEntities();
+        private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: StoreManager
         public ActionResult Index()
