@@ -9,6 +9,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using MvcMusicStore.Models;
+using MvcMusicStore.Models.Own;
 
 namespace MvcMusicStore.Controllers
 {
@@ -79,6 +80,8 @@ namespace MvcMusicStore.Controllers
             switch (result)
             {
                 case SignInStatus.Success:
+                    var user = UserManager.FindByEmail(model.Email);
+                    MigrateShoppingCart(user.UserName);
                     return RedirectToLocal(returnUrl);
                 case SignInStatus.LockedOut:
                     return View("Lockout");
@@ -156,7 +159,8 @@ namespace MvcMusicStore.Controllers
                 if (result.Succeeded)
                 {
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    
+                    MigrateShoppingCart(user.UserName);
+
                     // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
                     // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
@@ -401,6 +405,16 @@ namespace MvcMusicStore.Controllers
         public ActionResult ExternalLoginFailure()
         {
             return View();
+        }
+
+        //Own Methods
+
+        private void MigrateShoppingCart(string userName)
+        {
+            var cart = ShoppingCart.GetCart(this.HttpContext);
+
+            cart.MigrateCart(userName);
+            Session[ShoppingCart.CartSessionKey] = userName;
         }
 
         protected override void Dispose(bool disposing)
